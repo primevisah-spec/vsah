@@ -14,6 +14,9 @@
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- EmailJS Integration -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
     <style>
         /* --- CSS VARIABLES & RESET --- */
         :root {
@@ -1341,24 +1344,18 @@
                 </div>
 
                 <div class="contact-form">
-                    <form id="consultationForm" action="https://formsubmit.co/primevisah@gmail.com" method="POST">
-                        <!-- Hidden Settings -->
-                        <input type="hidden" name="_subject" value="New Visa Enquiry">
-                        <input type="hidden" name="_template" value="table">
-                        <input type="hidden" name="_captcha" value="false">
-                        <input type="hidden" name="_replyto">
-
+                    <form id="consultationForm">
                         <div class="form-group">
-                            <input type="text" name="name" class="form-control" placeholder="Full Name" required>
+                            <input type="text" name="user_name" class="form-control" placeholder="Full Name" required>
                         </div>
                         <div class="form-group">
-                            <input type="email" name="email" class="form-control" placeholder="Email Address" required>
+                            <input type="email" name="user_email" class="form-control" placeholder="Email Address" required>
                         </div>
                         <div class="form-group">
                             <input type="tel" name="phone" class="form-control" placeholder="Phone Number" required>
                         </div>
                         <div class="form-group">
-                            <select name="visa_type" class="form-control" style="background: rgba(255,255,255,0.1); color: #FFFFFF;">
+                            <select name="visa" class="form-control" style="background: rgba(255,255,255,0.1); color: #FFFFFF;">
                                 <option value="" disabled selected>Select Visa Type</option>
                                 <option>Student Visa</option>
                                 <option>Work Visa</option>
@@ -1430,24 +1427,18 @@
         <div class="modal-content">
             <span class="close-modal" onclick="document.getElementById('applyModal').style.display='none';">&times;</span>
             <h3 style="color: var(--accent-gold); margin-bottom: 20px; font-size: 1.5rem;">Submit Your Application</h3>
-            <form id="modalForm" action="https://formsubmit.co/primevisah@gmail.com" method="POST">
-                <!-- Hidden Settings -->
-                <input type="hidden" name="_subject" value="New Visa Enquiry">
-                <input type="hidden" name="_template" value="table">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_replyto">
-
+            <form id="modalForm">
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <input type="text" name="name" class="form-control" placeholder="Full Name" style="background: var(--primary-bg); color: var(--text-main); border: 1px solid #e2e8f0;" required>
+                    <input type="text" name="user_name" class="form-control" placeholder="Full Name" style="background: var(--primary-bg); color: var(--text-main); border: 1px solid #e2e8f0;" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 15px;">
-                    <input type="email" name="email" class="form-control" placeholder="Email Address" style="background: var(--primary-bg); color: var(--text-main); border: 1px solid #e2e8f0;" required>
+                    <input type="email" name="user_email" class="form-control" placeholder="Email Address" style="background: var(--primary-bg); color: var(--text-main); border: 1px solid #e2e8f0;" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 15px;">
                     <input type="tel" name="phone" class="form-control" placeholder="Phone Number" style="background: var(--primary-bg); color: var(--text-main); border: 1px solid #e2e8f0;" required>
                 </div>
                 <div class="form-group" style="margin-bottom: 20px;">
-                    <select name="visa_type" class="form-control" style="background: var(--primary-bg); color: var(--text-main); border: 1px solid #e2e8f0;" required>
+                    <select name="visa" class="form-control" style="background: var(--primary-bg); color: var(--text-main); border: 1px solid #e2e8f0;" required>
                         <option value="" disabled selected>Select Visa Type</option>
                         <option>Tourist Visa</option>
                         <option>Business Visa</option>
@@ -1511,39 +1502,28 @@
             }, 250); // Only run code every 250ms
         });
 
-        // Real Form Submission using Fetch
+        // Initialize EmailJS
+        emailjs.init("7FUgdfLZD9fw3ZqJp");
+
+        // Form Submission using EmailJS
         async function handleFormSubmit(e, isModal = false) {
             e.preventDefault();
             const form = e.target;
-            
-            // Update dynamic hidden fields based on user input
-            const name = form.querySelector('[name="name"]').value;
-            const email = form.querySelector('[name="email"]').value;
-            form.querySelector('[name="_subject"]').value = "New Enquiry from " + name;
-            form.querySelector('[name="_replyto"]').value = email;
-
-            const formData = new FormData(form);
             const submitBtn = form.querySelector('button[type="submit"]');
             
             submitBtn.disabled = true;
             submitBtn.innerText = 'Sending...';
 
             try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Accept': 'application/json' }
-                });
-
-                if (response.ok) {
-                    alert('Thank you! Your request has been sent to our email.');
-                    form.reset();
-                    if (isModal) document.getElementById('applyModal').style.display = 'none';
-                } else {
-                    alert('Oops! There was a problem submitting your form.');
-                }
+                // Send form data via EmailJS
+                await emailjs.sendForm('service_6vkd0rm', 'template_bc9jc3c', form);
+                
+                alert('Enquiry Sent Successfully!');
+                form.reset();
+                if (isModal) document.getElementById('applyModal').style.display = 'none';
             } catch (error) {
-                alert('Error connecting to the server. Please try again.');
+                alert('Failed to send enquiry. Please try again.');
+                console.error('EmailJS Error:', error);
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.innerText = isModal ? 'Submit Application' : 'Submit Request';
